@@ -15,12 +15,16 @@ import type {
   TWorkItemFilterConditionKey,
   TWorkItemFilterExpression,
   TWorkItemFilterExpressionData,
+  TWorkItemFilterNotCondition,
   TWorkItemFilterProperty,
 } from "@plane/types";
 import { LOGICAL_OPERATOR, MULTI_VALUE_OPERATORS, WORK_ITEM_FILTER_PROPERTY_KEYS } from "@plane/types";
 import { createConditionNode, createAndGroupNode, isAndGroupNode, isConditionNode } from "@plane/utils";
 // local imports
 import { FilterAdapter } from "../rich-filters/adapter";
+
+// Key used by the API for a negated condition, e.g. { "not": { "state_id__in": "..." } }
+const NOT_OPERATOR_KEY = "not";
 
 class WorkItemFiltersAdapter extends FilterAdapter<TWorkItemFilterProperty, TWorkItemFilterExpression> {
   /**
@@ -69,6 +73,16 @@ class WorkItemFiltersAdapter extends FilterAdapter<TWorkItemFilterProperty, TWor
     // It's a logical group - check which type
     const expressionKeys = Object.keys(expression);
 
+    // A NOT wrapping a single condition is a negated condition
+    if (NOT_OPERATOR_KEY in expression) {
+      const negatedExpression = (expression as TWorkItemFilterNotCondition)[NOT_OPERATOR_KEY];
+      if (!negatedExpression || !this._isWorkItemFilterConditionData(negatedExpression)) {
+        throw new Error("NOT must wrap a single condition");
+      }
+      const negatedCondition = this._convertExpressionToInternal(negatedExpression);
+      return { ...negatedCondition, isNegated: true } as TFilterExpression<TWorkItemFilterProperty>;
+    }
+
     if (LOGICAL_OPERATOR.AND in expression) {
       const andExpression = expression as { [LOGICAL_OPERATOR.AND]: TWorkItemFilterExpressionData[] };
       const andConditions = andExpression[LOGICAL_OPERATOR.AND];
@@ -111,7 +125,14 @@ class WorkItemFiltersAdapter extends FilterAdapter<TWorkItemFilterProperty, TWor
     expression: TFilterExpression<TWorkItemFilterProperty>
   ): TWorkItemFilterExpressionData {
     if (isConditionNode(expression)) {
-      return this._createWorkItemFilterConditionData(expression.property, expression.operator, expression.value);
+      const conditionData = this._createWorkItemFilterConditionData(
+        expression.property,
+        expression.operator,
+        expression.value
+      );
+      return expression.isNegated
+        ? ({ [NOT_OPERATOR_KEY]: conditionData } satisfies TWorkItemFilterNotCondition)
+        : conditionData;
     }
 
     // It's a group node
@@ -137,7 +158,7 @@ class WorkItemFiltersAdapter extends FilterAdapter<TWorkItemFilterProperty, TWor
     if (keys.length === 0) return false;
 
     // Check if any key contains logical operators (would indicate it's a group)
-    const hasLogicalOperators = keys.some((key) => key === LOGICAL_OPERATOR.AND);
+    const hasLogicalOperators = keys.some((key) => key === LOGICAL_OPERATOR.AND || key === NOT_OPERATOR_KEY);
     if (hasLogicalOperators) return false;
 
     // All keys must match the work item filter condition key pattern

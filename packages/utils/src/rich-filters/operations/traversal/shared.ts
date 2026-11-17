@@ -5,25 +5,18 @@
  */
 
 // plane imports
-import type {
-  TAllAvailableOperatorsForDisplay,
-  TFilterExpression,
-  TFilterProperty,
-  TSupportedOperators,
-} from "@plane/types";
+import type { TAllAvailableOperatorsForDisplay, TSupportedOperators } from "@plane/types";
+// local imports
+import { getNegatedOperator } from "../../operators/shared";
 
 /**
  * Helper function to get the display operator for a condition.
- * This checks for NOT group context and applies negation if needed.
+ * A negated condition is shown with the negated variant of its operator (e.g. "is not").
  * @param operator - The original operator
- * @param expression - The filter expression
- * @param conditionId - The ID of the condition
+ * @param isNegated - Whether the condition is negated
  * @returns The display operator (possibly negated)
  */
-export const getDisplayOperator = <P extends TFilterProperty>(
+export const getDisplayOperator = (
   operator: TSupportedOperators,
-  _expression: TFilterExpression<P>,
-  _conditionId: string
-): TAllAvailableOperatorsForDisplay =>
-  // Otherwise, return the operator as-is
-  operator;
+  isNegated: boolean | undefined
+): TAllAvailableOperatorsForDisplay => (isNegated ? getNegatedOperator(operator) : operator);

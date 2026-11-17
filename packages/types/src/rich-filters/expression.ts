@@ -45,6 +45,7 @@ type TBaseFilterNode = {
  * - property: Field being filtered
  * - operator: Comparison operator (is, is not, between, not between, etc.)
  * - value: Filter value(s) - array for operators that support multiple values
+ * - isNegated: When true the condition matches work items that do NOT satisfy it ("is not")
  * @template P - Property key type
  * @template V - Value type
  */
@@ -53,6 +54,7 @@ export type TFilterConditionNode<P extends TFilterProperty, V extends TFilterVal
   property: P;
   operator: TSupportedOperators;
   value: SingleOrArray<V>;
+  isNegated?: boolean;
 };
 
 /**

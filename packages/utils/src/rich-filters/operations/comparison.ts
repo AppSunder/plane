@@ -32,6 +32,7 @@ const createConditionComparable = <P extends TFilterProperty>(condition: TFilter
   type: condition.type,
   property: condition.property,
   operator: condition.operator,
+  isNegated: Boolean(condition.isNegated),
   value: Array.isArray(condition.value) ? condition.value : [condition.value],
 });
 
@@ -48,7 +49,7 @@ const createComparableChildren = <P extends TFilterProperty>(
   // Sort children by a consistent key for comparison to ensure order doesn't affect equality
   const sortedChildren = sortBy(childrenComparable, (child) => {
     if (child?.type === FILTER_NODE_TYPE.CONDITION) {
-      return `condition_${child.property}_${child.operator}_${JSON.stringify(child.value)}`;
+      return `condition_${child.property}_${child.operator}_${child.isNegated}_${JSON.stringify(child.value)}`;
     }
     // For nested groups, sort by logical operator and recursive structure
     if (child?.type === FILTER_NODE_TYPE.GROUP) {

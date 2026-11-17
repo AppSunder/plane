@@ -62,9 +62,20 @@ export type TComparisonOperator = (typeof COMPARISON_OPERATOR)[keyof typeof COMP
 export type TSupportedOperators = TCoreSupportedOperators | TExtendedSupportedOperators;
 
 /**
+ * Negated operators. These exist only for display and are never stored on a condition: a negated
+ * condition keeps its positive operator and sets `isNegated`.
+ */
+export const NEGATED_OPERATORS = {
+  NOT_EXACT: "not_exact",
+  NOT_IN: "not_in",
+} as const;
+
+export type TNegatedOperators = (typeof NEGATED_OPERATORS)[keyof typeof NEGATED_OPERATORS];
+
+/**
  * All operators available for use in rich filters UI, including negated versions.
  */
-export type TAllAvailableOperatorsForDisplay = TSupportedOperators;
+export type TAllAvailableOperatorsForDisplay = TSupportedOperators | TNegatedOperators;
 
 // -------- RE-EXPORTS --------
 

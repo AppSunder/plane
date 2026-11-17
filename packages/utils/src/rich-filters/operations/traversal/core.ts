@@ -187,7 +187,7 @@ export const extractConditionsWithDisplayOperators = <P extends TFilterProperty>
 
   // Transform operators using the extended helper
   return rawConditions.map((condition) => {
-    const displayOperator = getDisplayOperator(condition.operator, expression, condition.id);
+    const displayOperator = getDisplayOperator(condition.operator, condition.isNegated);
     return {
       ...condition,
       operator: displayOperator,

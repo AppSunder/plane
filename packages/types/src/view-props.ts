@@ -118,13 +118,21 @@ export type TWorkItemFilterConditionData = Partial<{
   [K in TWorkItemFilterConditionKey]: string | boolean | number;
 }>;
 
+// A negated condition ("is not"): the API's NOT wraps exactly one condition
+export type TWorkItemFilterNotCondition = {
+  not: TWorkItemFilterConditionData;
+};
+
 export type TWorkItemFilterAndGroup = {
-  [LOGICAL_OPERATOR.AND]: TWorkItemFilterConditionData[];
+  [LOGICAL_OPERATOR.AND]: (TWorkItemFilterConditionData | TWorkItemFilterNotCondition)[];
 };
 
 export type TWorkItemFilterGroup = TWorkItemFilterAndGroup;
 
-export type TWorkItemFilterExpressionData = TWorkItemFilterConditionData | TWorkItemFilterGroup;
+export type TWorkItemFilterExpressionData =
+  | TWorkItemFilterConditionData
+  | TWorkItemFilterNotCondition
+  | TWorkItemFilterGroup;
 
 export type TWorkItemFilterExpression = CompleteOrEmpty<TWorkItemFilterExpressionData>;
 

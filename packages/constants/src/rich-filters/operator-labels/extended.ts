@@ -4,7 +4,8 @@
  * See the LICENSE file for details.
  */
 
-import type { TExtendedSupportedOperators } from "@plane/types";
+import type { TExtendedSupportedOperators, TNegatedOperators } from "@plane/types";
+import { NEGATED_OPERATORS } from "@plane/types";
 
 /**
  * Extended operator labels
@@ -19,7 +20,10 @@ export const EXTENDED_DATE_OPERATOR_LABELS_MAP: Record<TExtendedSupportedOperato
 /**
  * Negated operator labels for all operators
  */
-export const NEGATED_OPERATOR_LABELS_MAP: Record<never, string> = {} as const;
+export const NEGATED_OPERATOR_LABELS_MAP: Record<TNegatedOperators, string> = {
+  [NEGATED_OPERATORS.NOT_EXACT]: "is not",
+  [NEGATED_OPERATORS.NOT_IN]: "is not any of",
+} as const;
 
 /**
  * Negated date operator labels for all date operators
